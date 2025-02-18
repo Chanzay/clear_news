@@ -1,9 +1,10 @@
 import NewsPage from "./components/NewsPage";
+import Header from "./components/Header";
 
 export default function Home() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Clear News</h1>
+    <div>
+      <Header />
       <NewsPage />
     </div>
   );
