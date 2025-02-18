@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface Article {
   title: string;
@@ -19,11 +20,16 @@ const categories = [
 ];
 
 export default function NewsPage() {
+  const { data: session } = useSession(); // Get logged-in user session
   const [news, setNews] = useState<Article[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("general");
   const [searchQuery, setSearchQuery] = useState("");
-  const [summaries, setSummaries] = useState<{ [key: number]: string }>({}); // Store summaries
+  const [summaries, setSummaries] = useState<{ [key: string]: string }>({});
+  const [savedArticles, setSavedArticles] = useState<{
+    [key: string]: boolean;
+  }>({}); // Track saved articles
 
+  // Fetch news based on category and search
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -44,8 +50,35 @@ export default function NewsPage() {
     return () => clearTimeout(timeout);
   }, [selectedCategory, searchQuery]);
 
+  // Fetch saved articles when the page loads
+  useEffect(() => {
+    const fetchSavedArticles = async () => {
+      try {
+        const res = await fetch("/api/articles");
+        const data = await res.json();
+
+        // Convert array of saved articles into a lookup object
+        const savedMap = data.reduce(
+          (acc: { [key: string]: boolean }, article: Article) => {
+            acc[article.url] = true;
+            return acc;
+          },
+          {}
+        );
+
+        setSavedArticles(savedMap);
+      } catch (error) {
+        console.error("Error fetching saved articles:", error);
+      }
+    };
+
+    if (session) {
+      fetchSavedArticles();
+    }
+  }, [session]);
+
   // Function to summarize an article
-  const summarizeArticle = async (index: number, text: string) => {
+  const summarizeArticle = async (url: string, text: string) => {
     try {
       const res = await fetch("/api/summarize", {
         method: "POST",
@@ -54,9 +87,54 @@ export default function NewsPage() {
       });
 
       const data = await res.json();
-      setSummaries((prev) => ({ ...prev, [index]: data.summary }));
+      setSummaries((prev) => ({ ...prev, [url]: data.summary }));
     } catch (error) {
       console.error("Error summarizing article:", error);
+    }
+  };
+
+  // Function to toggle save/remove article
+  const toggleSaveArticle = async (article: Article) => {
+    if (!session) {
+      alert("You must be logged in to save articles.");
+      return;
+    }
+
+    if (savedArticles[article.url]) {
+      // Remove the article if already saved
+      console.log("Removing article:", article.url);
+
+      const res = await fetch("/api/articles/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: article.url }),
+      });
+
+      if (res.ok) {
+        setSavedArticles((prev) => ({ ...prev, [article.url]: false }));
+      } else {
+        alert("Failed to remove article.");
+      }
+    } else {
+      // Save the article if not saved
+      console.log("Saving article:", article);
+
+      const res = await fetch("/api/articles/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: article.title,
+          url: article.url,
+          imageUrl: article.urlToImage,
+          description: article.description,
+        }),
+      });
+
+      if (res.ok) {
+        setSavedArticles((prev) => ({ ...prev, [article.url]: true }));
+      } else {
+        alert("Failed to save article.");
+      }
     }
   };
 
@@ -115,16 +193,26 @@ export default function NewsPage() {
 
             {/* Summarize Button */}
             <button
-              onClick={() => summarizeArticle(index, article.description)}
+              onClick={() => summarizeArticle(article.url, article.description)}
               className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition-all"
             >
               Summarize
             </button>
 
+            {/* Save/Remove Article Button */}
+            <button
+              onClick={() => toggleSaveArticle(article)}
+              className={`mt-2 px-4 py-2 ml-2 rounded ${
+                savedArticles[article.url] ? "bg-gray-500" : "bg-green-500"
+              } text-white`}
+            >
+              {savedArticles[article.url] ? "Saved" : "Save"}
+            </button>
+
             {/* Display Summary */}
-            {summaries[index] && (
+            {summaries[article.url] && (
               <p className="mt-2 text-gray-800 bg-gray-100 p-2 rounded shadow-inner">
-                {summaries[index]}
+                {summaries[article.url]}
               </p>
             )}
 
