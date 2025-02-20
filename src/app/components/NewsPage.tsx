@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 interface Article {
   title: string;
@@ -180,10 +181,13 @@ export default function NewsPage() {
             className="bg-white border border-gray-200 p-5 rounded-lg shadow-lg hover:shadow-2xl transition-transform transform hover:scale-105"
           >
             {article.urlToImage && (
-              <img
+              <Image
                 src={article.urlToImage}
                 alt={article.title}
+                width={500} // Add width
+                height={300} // Add height
                 className="w-full h-48 object-cover rounded-lg mb-4"
+                unoptimized // Use this if images are from an external source like NewsAPI
               />
             )}
             <h2 className="text-xl font-semibold text-gray-800 mb-2">

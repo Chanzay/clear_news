@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
+import Image from "next/image";
 
 type Article = {
   title: string;
@@ -96,10 +97,13 @@ export default function SavedArticles() {
             .map((article, index) => (
               <li key={index} className="p-4 bg-white rounded-lg shadow-lg">
                 {article.imageUrl && (
-                  <img
+                  <Image
                     src={article.imageUrl}
                     alt={article.title}
+                    width={500} // Add width
+                    height={300} // Add height
                     className="w-full h-48 object-cover rounded-lg mb-4"
+                    unoptimized // Use this if images are from an external source like NewsAPI
                   />
                 )}
                 <h2 className="text-xl font-semibold mb-2">{article.title}</h2>

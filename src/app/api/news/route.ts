@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const API_KEY = process.env.NEWS_API_KEY;
     
     // If there is a search query, fetch relevant articles
-    let API_URL = searchQuery
+    const API_URL = searchQuery
       ? `https://newsapi.org/v2/everything?q=${searchQuery}&language=en&apiKey=${API_KEY}`
       : `https://newsapi.org/v2/top-headlines?country=us&category=${category}&apiKey=${API_KEY}`;
 
@@ -20,6 +20,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(data);
   } catch (error) {
+    console.error("News API Fetch Error:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
 }
