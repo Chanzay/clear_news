@@ -157,7 +157,7 @@ export default function NewsPage() {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex justify-center space-x-4 mb-6">
+      <div className="flex flex-wrap justify-center gap-2 mb-6">
         {categories.map((category) => (
           <button
             key={category}
