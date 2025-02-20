@@ -44,12 +44,8 @@ export default function NewsPage() {
       }
     };
 
-    const timeout = setTimeout(() => {
-      fetchNews();
-    }, 500);
-
-    return () => clearTimeout(timeout);
-  }, [selectedCategory, searchQuery]);
+    fetchNews(); // Remove timeout for category changes
+  }, [selectedCategory, searchQuery]); // Keep dependencies
 
   // Fetch saved articles when the page loads
   useEffect(() => {
@@ -142,7 +138,7 @@ export default function NewsPage() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-6">
-        Latest News
+        Top Headlines
       </h1>
 
       {/* Search Bar */}
