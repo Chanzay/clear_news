@@ -1,7 +1,33 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 
-function SavedPage() {
+type Article = {
+  title: string;
+  url: string;
+  imageUrl?: string;
+  description?: string;
+};
+
+// Define the prop types for SavedPage
+interface SavedPageProps {
+  searchQuery: string;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  articles: Article[];
+  summaries: { [url: string]: string };
+  removeSavedArticle: (url: string) => Promise<void>;
+  summarizeArticle: (url: string, text?: string) => Promise<void>;
+}
+
+export function SavedPage({
+  searchQuery,
+  setSearchQuery,
+  articles,
+  summaries,
+  removeSavedArticle,
+  summarizeArticle,
+}: SavedPageProps) {
   return (
     <div>
       <div className="p-4">
@@ -36,10 +62,10 @@ function SavedPage() {
                   <Image
                     src={article.imageUrl}
                     alt={article.title}
-                    width={500} // Add width
-                    height={300} // Add height
+                    width={500}
+                    height={300}
                     className="w-full h-48 object-cover rounded-lg mb-4"
-                    unoptimized // Use this if images are from an external source like NewsAPI
+                    unoptimized
                   />
                 )}
                 <h2 className="text-xl font-semibold mb-2">{article.title}</h2>
@@ -57,7 +83,7 @@ function SavedPage() {
                   </a>
                   <button
                     onClick={() =>
-                      summarizeArticle(article.url, article.description || "")
+                      summarizeArticle(article.url, article.description)
                     }
                     className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-700 transition-all"
                   >
@@ -82,5 +108,3 @@ function SavedPage() {
     </div>
   );
 }
-
-export default SavedPage;

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Header from "../components/Header";
-import Image from "next/image";
 import { SavedPage } from "../components/SavedPage";
 
 type Article = {
@@ -69,7 +68,14 @@ export default function SavedArticles() {
   return (
     <div>
       <Header />
-      <SavedPage />
+      <SavedPage
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        articles={articles}
+        summaries={summaries}
+        removeSavedArticle={removeSavedArticle}
+        summarizeArticle={summarizeArticle}
+      />
     </div>
   );
 }
